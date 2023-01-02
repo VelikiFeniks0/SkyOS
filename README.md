@@ -15,3 +15,9 @@ Actually this is not a fake OS this is just a simulation.
 I made it for fun.
 
 to find a source code in SkyOS you need to be in root directory
+
+to check skylog press control and h
+to go back to tasks display and terminal press control and h again
+
+
+have fun!
