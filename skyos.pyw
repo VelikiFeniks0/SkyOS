@@ -286,7 +286,7 @@ def Help():
 # show source code
 def src():
     global srcv, terminal_text, edit_src, rootVar
-    this_path = os.getcwd()+'\\skyos.py'
+    this_path = os.getcwd()+'\\skyos.pyw'
     if rootVar == False:
         terminal_text.insert(END, 'Source code not found')
         srcv = False
