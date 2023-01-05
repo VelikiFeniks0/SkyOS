@@ -3,6 +3,7 @@ Introducing SkyOS, a fake OS made in python and tkinter
 
 
 Use Help() command in SkyOS
+
 when you see bootup screen and if you see DO YOU WANT TO INSTALL SKYOS (Y/N): just press y or n
 
 SkyOS may have some bugs and it may be slow.
