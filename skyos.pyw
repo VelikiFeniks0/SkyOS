@@ -543,13 +543,13 @@ def toggle_terminal_and_task_display(event=None):
         try:
             task_display.pack_forget()
         except:
-            pass
+            terminal_text.pack_forget()
         try:
             open_file.pack_forget()
             touch_file.pack_forget()
             edit_src.pack_forget()
         except:
-            pass
+            terminal_text.pack_forget()
         task_displayed = False
     else:
         # Terminal and task display are not being displayed, show them
