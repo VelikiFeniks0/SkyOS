@@ -64,6 +64,8 @@ memory_percent = False
 memory_used = False
 memory_usage_label = False
 disk_percent = False
+lineindex = 1.13
+endlineindex = 1.0
 disk_total = False
 disk_usage = False
 disk_usage_label = False
@@ -171,7 +173,7 @@ def update_installation_progress(percentage):
 def Println(arg):
     global terminal_text
     root.update_idletasks()
-    terminal_text.insert(END, f'{arg}')
+    terminal_text.insert(END, f'\n{arg}')
 
 # change background / foreground color
 def change_color(type, color):
@@ -200,7 +202,7 @@ def reboot():
 # print working directory
 def pwd():
     global terminal_text, drivename, path
-    terminal_text.insert(END, f'{drivename+path}')
+    terminal_text.insert(END, f'\n{drivename+path}')
 
 # clear terminal
 def clear():
@@ -337,7 +339,7 @@ def kill(task):
     except:
         terminal_text.insert(END, 'Cannot kill task')
 
-# play sound [frequency, duration]
+# play sound [frequency, duration] 
 def play_sound(freq, dur):
     winsound.Beep(freq, dur)
 
@@ -362,9 +364,7 @@ def dir():
 {drivename}/root:
 ├──src
 ├──tasks_display
-├──touch_file
-│
-'''
+├──touch_file'''
         terminal_text.insert(END, f'{rootdir}\n')
         for i in dirs['C']['root']:
             rootdirs = terminal_text.insert(END, f'├──{i}\n')
@@ -372,8 +372,7 @@ def dir():
     if PathVar == 2:
         homedir = f'''
 {drivename}/root/home:
-│
-'''
+│'''
         terminal_text.insert(END, f'{homedir}\n')
         for i in dirs['C']['root']['home']:
             homedirs = terminal_text.insert(END, f'├──{i}\n')
@@ -388,11 +387,22 @@ def dir():
         terminal_text.insert(END, f'{cdir}\n')
 # execute commands
 def execute_command(cmd):
-    global code, terminal_text
+    global code, terminal_text, PathVar, lineindex, endlineindex
     try:
-        code = exec(terminal_text.get(1.0, END))
+        terminal_text.insert(END, f'{drivename+path}>')
+        code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
+        if (terminal_text.get(lineindex, f'{str(endlineindex)} lineend') == ''):
+            pass
+        if (terminal_text.get(1.0, END) == ''):
+            lineindex = 1.13
+            endlineindex = 1.0
+            terminal_text.insert(END, f'{drivename+path}>')
+        lineindex += 1
+        endlineindex += 1
     except Exception as e:
         terminal_text.insert(END, f'{e}')
+        lineindex += 1
+        endlineindex += 1
 # tasks display
 def tasks_display(event=None):
     global task_display, srcv, touched, dirs, opened, terminalVar, task_displayed
@@ -531,10 +541,19 @@ def show_skylog(event=None):
     if terminalVar:
         # Terminal is being displayed, bind Control-h to toggle display
         root.bind('<Control-h>', toggle_terminal_and_task_display)
+        root.bind('<Control-r>', return_terminal)
     else:
         # Terminal is not being displayed, unbind Control-h
         root.unbind('<Control-h>')
+        root.unbind('<Control-r>')
 # Toggle display of terminal and task display
+def return_terminal(event=None):
+    global terminal_text, terminalVar, lineindex, endlineindex
+    lineindex = 1.13
+    endlineindex = 1.0
+    terminal_text.destroy()
+    root.after(1, terminal)
+    root.after(1, execute_command)
 def toggle_terminal_and_task_display(event=None):
     global terminal_text, task_display, task_displayed, open_file, touch_file, edit_src
     if task_displayed:
@@ -571,9 +590,12 @@ def return_combination(event=None):
 
 # main terminal
 def terminal(event=None):
-    global terminal_text, shell, root, terminalVar
+    global terminal_text, shell, root, terminalVar, lineindex, endlineindex
+    lineindex = 1.13
+    endlineindex = 1.0
     terminalVar = True
     terminal_text = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-850, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
+    terminal_text.insert(END, f'{drivename+path}>')
     terminal_text.pack(side=LEFT)
     shell = True
     if shell:
@@ -661,6 +683,7 @@ def boot_skyos():
     root.after(100, load_skyos)
 
 progress_bar = ttk.Progressbar(root, orient="horizontal", length=200, mode="determinate")
+
 # start functions
 root.after(2000, load_boot)
 root.after(4000, display_cpu_info)
