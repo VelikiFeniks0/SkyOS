@@ -202,7 +202,7 @@ def reboot():
 # print working directory
 def pwd():
     global terminal_text, drivename, path
-    terminal_text.insert(END, f'\n{drivename+path}')
+    terminal_text.insert(END, f'\n\n{drivename+path}\n')
 
 # clear terminal
 def clear():
@@ -360,7 +360,7 @@ def rm(dir):
 def dir():
     global terminal_text, dirs, PathVar
     if rootVar:
-        rootdir = f'''
+        rootdir = f'''\n
 {drivename}/root:
 ├──src
 ├──tasks_display
@@ -370,7 +370,7 @@ def dir():
             rootdirs = terminal_text.insert(END, f'├──{i}\n')
         terminal_text.insert(END, '└────────')
     if PathVar == 2:
-        homedir = f'''
+        homedir = f'''\n
 {drivename}/root/home:
 │'''
         terminal_text.insert(END, f'{homedir}\n')
@@ -378,7 +378,7 @@ def dir():
             homedirs = terminal_text.insert(END, f'├──{i}\n')
         terminal_text.insert(END, '└────────')
     if PathVar == 0:
-        cdir = f'''
+        cdir = f'''\n
 {drivename}
 ├──skylog
 ├──root
@@ -387,16 +387,37 @@ def dir():
         terminal_text.insert(END, f'{cdir}\n')
 # execute commands
 def execute_command(cmd):
-    global code, terminal_text, PathVar, lineindex, endlineindex
+    global code, terminal_text, PathVar, lineindex, endlineindex, terminalVar
     try:
         terminal_text.insert(END, f'{drivename+path}>')
-        code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
-        if (terminal_text.get(lineindex, f'{str(endlineindex)} lineend') == ''):
-            pass
-        if (terminal_text.get(1.0, END) == ''):
-            lineindex = 1.13
+        if PathVar == 2:
+            code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
+            if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
+                pass
+            if (terminal_text.get(1.0, END) == ''):
+                lineindex = 1.13
+                endlineindex = 1.0
+                terminal_text.insert(END, f'{drivename+path}>')
+        if PathVar == 1:
+            lineindex = 1.8
             endlineindex = 1.0
-            terminal_text.insert(END, f'{drivename+path}>')
+            code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
+            if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
+                pass
+            if (terminal_text.get(1.0, END) == ''):
+                lineindex = 1.8
+                endlineindex = 1.0
+                terminal_text.insert(END, f'{drivename+path}>') 
+        if PathVar == 0:
+            lineindex = 1.4
+            endlineindex = 1.0
+            code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
+            if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
+                pass
+            if (terminal_text.get(1.0, END) == ''):
+                lineindex = 1.4
+                endlineindex = 1.0
+                terminal_text.insert(END, f'{drivename+path}>') 
         lineindex += 1
         endlineindex += 1
     except Exception as e:
@@ -548,9 +569,16 @@ def show_skylog(event=None):
         root.unbind('<Control-r>')
 # Toggle display of terminal and task display
 def return_terminal(event=None):
-    global terminal_text, terminalVar, lineindex, endlineindex
-    lineindex = 1.13
-    endlineindex = 1.0
+    global terminal_text, terminalVar, lineindex, endlineindex, PathVar
+    if PathVar == 2:
+        lineindex = 1.13
+        endlineindex = 1.0
+    if PathVar == 1:
+        lineindex = 1.8
+        endlineindex = 1.0
+    if PathVar == 0:
+        lineindex = 1.4
+        endlineindex = 1.0
     terminal_text.destroy()
     root.after(1, terminal)
     root.after(1, execute_command)
@@ -590,9 +618,16 @@ def return_combination(event=None):
 
 # main terminal
 def terminal(event=None):
-    global terminal_text, shell, root, terminalVar, lineindex, endlineindex
-    lineindex = 1.13
-    endlineindex = 1.0
+    global terminal_text, shell, root, terminalVar, lineindex, endlineindex, PathVar
+    if PathVar == 2:
+        lineindex = 1.13
+        endlineindex = 1.0
+    if PathVar == 1:
+        lineindex = 1.8
+        endlineindex = 1.0
+    if PathVar == 0:
+        lineindex = 1.4
+        endlineindex = 1.0
     terminalVar = True
     terminal_text = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-850, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
     terminal_text.insert(END, f'{drivename+path}>')
