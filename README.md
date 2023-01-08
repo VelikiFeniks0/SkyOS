@@ -20,5 +20,7 @@ to find a source code in SkyOS you need to be in root directory
 to check skylog press control and h
 to go back to tasks display and terminal press control and h again
 
+if terminal doesn't work anymore press control and r to reset the terminal
+
 
 have fun!
