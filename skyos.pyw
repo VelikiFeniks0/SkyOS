@@ -208,7 +208,7 @@ def pwd():
 def clear():
     global terminal_text
     try:
-        terminal_text.delete(1.0, END)
+        root.after(1, return_terminal)
     except:
         pass
 
@@ -219,10 +219,12 @@ def cd(dir):
         PathVar = 2
         rootVar = False
         path = '/'+paths[1]+'/'+paths[2]
+        root.after(1, return_terminal)
     if dir == 'root' and PathVar == 0:
         rootVar = True
         PathVar = 1
         path = '/'+paths[PathVar]
+        root.after(1, return_terminal)
     if dir == 'home' and PathVar == 0:
         terminal_text.insert(END, 'Directory not found')
     if dir == '..':
@@ -230,6 +232,7 @@ def cd(dir):
         if PathVar < 0:
             PathVar = 0
         path = '/'+paths[PathVar]
+        root.after(1, return_terminal)
     if PathVar == 1:
         rootVar = True
     if PathVar == 2:
@@ -242,12 +245,12 @@ def touch(new_dir):
     global touch_file,  save_file, task_display, touched, dirs, touch_file, dirname, opened
     dirname = new_dir
     if rootVar:
-        touch_file = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-850, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
+        touch_file = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-830, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
         touch_file.pack(side=RIGHT)
         dirs['C']['root'][new_dir] = touch_file.get(1.0, END)
         touched = True
     if PathVar == 2:
-        touch_file = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-850, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
+        touch_file = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-830, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
         touch_file.pack(side=RIGHT)
         dirs['C']['root']['home'][new_dir] = touch_file.get(1.0, END)
         touched = True
@@ -260,7 +263,7 @@ def Open(file):
     if rootVar:
         if file in dirs['C']['root']:
             opened = True
-            open_file = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-850, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
+            open_file = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-830, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
             open_file.pack(side=RIGHT) 
             rootdir = dirs['C']['root'][file]
             open_file.insert(END, rootdir)
@@ -270,7 +273,7 @@ def Open(file):
     elif PathVar == 2:
         if file in dirs['C']['root']['home']:
             opened = True
-            open_file = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-850, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
+            open_file = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-830, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
             open_file.pack(side=RIGHT)
             homedir = dirs['C']['root']['home'][file]
             open_file.insert(END, homedir)
@@ -294,7 +297,7 @@ def src():
         srcv = False
     else:
         srcv = True
-        edit_src = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-850, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
+        edit_src = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-830, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
         edit_src.pack(side=RIGHT)
         f = open(this_path, 'r')
         edit_src.insert(END, f'\n{f.read()}\n\n')
@@ -387,39 +390,40 @@ def dir():
         terminal_text.insert(END, f'{cdir}\n')
 # execute commands
 def execute_command(cmd):
-    global code, terminal_text, PathVar, lineindex, endlineindex, terminalVar
+    global code, terminal_text, PathVar, lineindex, endlineindex, terminalVar, shell
     try:
-        terminal_text.insert(END, f'{drivename+path}>')
-        if PathVar == 2:
-            code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
-            if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
-                pass
-            if (terminal_text.get(1.0, END) == ''):
-                lineindex = 1.13
-                endlineindex = 1.0
-                terminal_text.insert(END, f'{drivename+path}>')
-        if PathVar == 1:
-            lineindex = 1.8
-            endlineindex = 1.0
-            code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
-            if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
-                pass
-            if (terminal_text.get(1.0, END) == ''):
+        if shell:
+            terminal_text.insert(END, f'{drivename+path}>')
+            if PathVar == 2:
+                code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
+                if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
+                    pass
+                if (terminal_text.get(1.0, END) == ''):
+                    lineindex = 1.13
+                    endlineindex = 1.0
+                    terminal_text.insert(END, f'{drivename+path}>')
+            if PathVar == 1:
                 lineindex = 1.8
                 endlineindex = 1.0
-                terminal_text.insert(END, f'{drivename+path}>') 
-        if PathVar == 0:
-            lineindex = 1.4
-            endlineindex = 1.0
-            code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
-            if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
-                pass
-            if (terminal_text.get(1.0, END) == ''):
+                code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
+                if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
+                    pass
+                if (terminal_text.get(1.0, END) == ''):
+                    lineindex = 1.8
+                    endlineindex = 1.0
+                    terminal_text.insert(END, f'{drivename+path}>') 
+            if PathVar == 0:
                 lineindex = 1.4
                 endlineindex = 1.0
-                terminal_text.insert(END, f'{drivename+path}>') 
-        lineindex += 1
-        endlineindex += 1
+                code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
+                if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
+                    pass
+                if (terminal_text.get(1.0, END) == ''):
+                    lineindex = 1.4
+                    endlineindex = 1.0
+                    terminal_text.insert(END, f'{drivename+path}>') 
+            lineindex += 1
+            endlineindex += 1
     except Exception as e:
         terminal_text.insert(END, f'{e}')
         lineindex += 1
@@ -629,7 +633,7 @@ def terminal(event=None):
         lineindex = 1.4
         endlineindex = 1.0
     terminalVar = True
-    terminal_text = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-850, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
+    terminal_text = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-830, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
     terminal_text.insert(END, f'{drivename+path}>')
     terminal_text.pack(side=LEFT)
     shell = True
