@@ -61,6 +61,7 @@ cpu_usage = False
 cpu_usage_label = False
 memory = False
 memory_percent = False
+view = False
 memory_used = False
 memory_usage_label = False
 disk_percent = False
@@ -70,7 +71,11 @@ disk_total = False
 disk_usage = False
 disk_usage_label = False
 disk_used = False
+combobox = False
 shell_label = False
+img = False
+painting = False
+canvas = False
 error_label = False
 opened = False
 saved_file = False
@@ -81,7 +86,7 @@ path = '/'+paths[1]+'/'+paths[2]
 
 # directories
 dirs = {
-    'C': {
+    f'{drivename}': {
         'skylog': '',
         'root': {
             'home': {}
@@ -189,14 +194,14 @@ def change_color(type, color):
 
 # shutdown skyos
 def shutdown():
-    time.sleep(2)
+    time.sleep(0.5)
     sys.exit()
 
 # reboot skyos
 def reboot():
     global terminal_text
     terminal_text.insert(END, 'Rebooting...')
-    time.sleep(2)
+    time.sleep(0.5)
     os.execv(sys.executable, ['python'] + sys.argv)
 
 # print working directory
@@ -247,12 +252,12 @@ def touch(new_dir):
     if rootVar:
         touch_file = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-830, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
         touch_file.pack(side=RIGHT)
-        dirs['C']['root'][new_dir] = touch_file.get(1.0, END)
+        dirs[f'{drivename}']['root'][new_dir] = touch_file.get(1.0, END)
         touched = True
     if PathVar == 2:
         touch_file = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-830, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
         touch_file.pack(side=RIGHT)
-        dirs['C']['root']['home'][new_dir] = touch_file.get(1.0, END)
+        dirs[f'{drivename}']['root']['home'][new_dir] = touch_file.get(1.0, END)
         touched = True
     if PathVar == 0:
         terminal_text.insert(END, 'Cannot create files in system directory')
@@ -261,21 +266,21 @@ def touch(new_dir):
 def Open(file):
     global dirs, dirname, PathVar, terminal_text, open_file, opened
     if rootVar:
-        if file in dirs['C']['root']:
+        if file in dirs[f'{drivename}']['root']:
             opened = True
             open_file = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-830, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
             open_file.pack(side=RIGHT) 
-            rootdir = dirs['C']['root'][file]
+            rootdir = dirs[f'{drivename}']['root'][file]
             open_file.insert(END, rootdir)
         else:
             terminal_text.insert(END, 'File not found')
             opened = False
     elif PathVar == 2:
-        if file in dirs['C']['root']['home']:
+        if file in dirs[f'{drivename}']['root']['home']:
             opened = True
             open_file = Text(root, cursor='xterm', insertbackground='yellow', insertwidth=15, bg='white', fg='blue', height=screen_height-830, width=100, selectbackground='light blue', highlightcolor='red', highlightthickness=3, highlightbackground='red')
             open_file.pack(side=RIGHT)
-            homedir = dirs['C']['root']['home'][file]
+            homedir = dirs[f'{drivename}']['root']['home'][file]
             open_file.insert(END, homedir)
         else:
             terminal_text.insert(END, 'File not found')
@@ -286,7 +291,7 @@ def Open(file):
 # help command / command list    
 def Help():
     global terminal_text
-    terminal_text.insert(END, '\nHelp() - command list\ntouch() - create directory [virtual directory name, computer directory name]\nkill() - kill task [task name]\ncd() - change directory [directory name or .. to go to previous directory]\nclear() - clear terminal\npwd() - print working directory\nreboot() - reboot\nshutdown() - shutdown\nchange_color() [type, color]\nPrintln - print arguments [argument]\nsrc() - source code\nSave_src() - save edited source code\nSave() - save files [file]\ntasks_display() - display tasks\nplay_sound() - play sound [frequency, duration]\nrm - remove directory [directory]\ndir - show directories\nskylog_start() - start skylog\n')
+    terminal_text.insert(END, '\nHelp() - command list\ntouch() - create directory [virtual directory name, computer directory name]\nkill() - kill task [task name]\ncd() - change directory [directory name or .. to go to previous directory]\nclear() - clear terminal\npwd() - print working directory\nreboot() - reboot\nshutdown() - shutdown\nchange_color() [type, color]\nPrintln() - print arguments [argument]\nsrc() - source code\nSave_src() - save edited source code\nSave() - save files [file]\ntasks_display() - display tasks\nplay_sound() - play sound [frequency, duration]\nrm() - remove directory [directory]\ndir() - show directories\nskylog_start() - start skylog\nView() - view mode in terminal\npaint_canvas() - paint app\n\nkeyboard shortcuts\n\nF1 - open menu\nControl-h - toggle terminal and task display\nControl-r - reset terminal\n')
 
 # show source code
 def src():
@@ -320,14 +325,14 @@ def Save():
     global saved_file, touch_file, dirs, terminal_text, PathVar
     saved_file = touch_file.get(1.0, END)
     if rootVar:
-        dirs['C']['root'][dirname] = saved_file
+        dirs[f'{drivename}']['root'][dirname] = saved_file
     if PathVar == 2:
-        dirs['C']['root']['home'][dirname] = saved_file
+        dirs[f'{drivename}']['root']['home'][dirname] = saved_file
     if PathVar == 0:
         terminal_text.insert(END, 'Cannot create files in system directory')
 # kill task command
 def kill(task):
-    global edit_src, opened, srcv, touched, terminal_text, terminalVar
+    global edit_src, opened, srcv, touched, terminal_text, terminalVar, canvas, painting
     try:
         task.destroy()
         if task == edit_src:
@@ -338,6 +343,9 @@ def kill(task):
             root.after(1, task_update)
         if task == open_file:
             opened = False
+            root.after(1, task_update)
+        if task == canvas:
+            painting = False
             root.after(1, task_update)
     except:
         terminal_text.insert(END, 'Cannot kill task')
@@ -351,9 +359,9 @@ def rm(dir):
     global rootVar, dirs, terminal_text, PathVar
     try:
         if rootVar:
-            dirs['C']['root'].pop(dir)
+            dirs[f'{drivename}']['root'].pop(dir)
         if PathVar == 2:
-            dirs['C']['root']['home'].pop(dir)
+            dirs[f'{drivename}']['root']['home'].pop(dir)
         if PathVar == 0:
             terminal_text.insert(END, 'Cannot remove system directory')
     except:
@@ -369,7 +377,7 @@ def dir():
 ├──tasks_display
 ├──touch_file'''
         terminal_text.insert(END, f'{rootdir}\n')
-        for i in dirs['C']['root']:
+        for i in dirs[f'{drivename}']['root']:
             rootdirs = terminal_text.insert(END, f'├──{i}\n')
         terminal_text.insert(END, '└────────')
     if PathVar == 2:
@@ -377,7 +385,7 @@ def dir():
 {drivename}/root/home:
 │'''
         terminal_text.insert(END, f'{homedir}\n')
-        for i in dirs['C']['root']['home']:
+        for i in dirs[f'{drivename}']['root']['home']:
             homedirs = terminal_text.insert(END, f'├──{i}\n')
         terminal_text.insert(END, '└────────')
     if PathVar == 0:
@@ -388,49 +396,111 @@ def dir():
 └────────
 '''
         terminal_text.insert(END, f'{cdir}\n')
+# view
+def View():
+    global view
+    view = True
+
+# paint
+def paint_canvas(event=None):
+    global img, canvas, painting
+    painting = True
+    canvas = Canvas(root, bg='white', width=screen_width, height=screen_height, cursor='pencil')
+    img = tk.PhotoImage(width=screen_width, height=screen_height)
+    canvas.create_image((0,0), image=img, state="normal", anchor='nw')
+    img.put('white',to=(0, 0, screen_width, screen_height))
+    canvas.pack()
+    canvas.bind('<B1-Motion>', paint)
+    root.bind('<Escape>', destroy_paint)
+def destroy_paint(event=None):
+    global canvas, painting
+    canvas.destroy()
+    painting = False
+def paint(event):
+    global img
+    x, y = event.x, event.y
+    img.put("black", to=(x-10, y-10, x+10, y+10))
+# menu
+def menu(event=None):
+    global combobox
+    style1 = ttk.Style()
+    style1.theme_create('combobox', 
+    settings={
+        'TCombobox': {
+            'configure': {
+                'fieldbackground': 'Blue',
+                'background': 'Blue',
+                'foreground': 'Blue',
+                'selectforeground': 'Blue',
+                'selectbackground': 'Blue',
+                'selectedbackground': 'Yellow',
+                'cursor': 'top_left_arrow'
+                
+            }
+        }
+    }
+    )
+    def down(event):
+        if event.keysym == 'F1':
+            combobox = ttk.Combobox(root, background='blue', values=['skylog_start', 'paint'], state='readonly', foreground='white', cursor='top_left_arrow')
+            combobox.event_generate('<Down>')
+    def option(event=None):
+        if combobox.get() == 'skylog_start':
+            root.after(1, skylog_start) 
+        if combobox.get() == 'paint':
+            root.after(1, paint_canvas)      
+    style1.theme_use('combobox')
+    combobox = ttk.Combobox(root, background='blue', values=['skylog_start', 'paint'], state='readonly', foreground='white', cursor='top_left_arrow')
+    combobox.lower()
+    combobox.place(x=0, y=0)
+    root.bind('<F1>', down)
+    root.option_add('*TCombobox*Listbox.selectBackground', 'yellow')
+    root.option_add('*TCombobox*Listbox.Background', 'blue')
+    root.bind('<<ComboboxSelected>>', option)
 # execute commands
 def execute_command(cmd):
-    global code, terminal_text, PathVar, lineindex, endlineindex, terminalVar, shell
+    global code, terminal_text, PathVar, lineindex, endlineindex, terminalVar, shell, view
     try:
         if shell:
-            terminal_text.insert(END, f'{drivename+path}>')
-            if PathVar == 2:
-                code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
-                if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
-                    pass
-                if (terminal_text.get(1.0, END) == ''):
-                    lineindex = 1.13
-                    endlineindex = 1.0
-                    terminal_text.insert(END, f'{drivename+path}>')
-            if PathVar == 1:
-                lineindex = 1.8
-                endlineindex = 1.0
-                code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
-                if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
-                    pass
-                if (terminal_text.get(1.0, END) == ''):
+            if view == False:
+                terminal_text.insert(END, f'{drivename+path}>')
+                if PathVar == 2:
+                    code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
+                    if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
+                        pass
+                    if (terminal_text.get(1.0, END) == ''):
+                        lineindex = 1.13
+                        endlineindex = 1.0
+                        terminal_text.insert(END, f'{drivename+path}>')
+                if PathVar == 1:
                     lineindex = 1.8
                     endlineindex = 1.0
-                    terminal_text.insert(END, f'{drivename+path}>') 
-            if PathVar == 0:
-                lineindex = 1.4
-                endlineindex = 1.0
-                code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
-                if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
-                    pass
-                if (terminal_text.get(1.0, END) == ''):
+                    code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
+                    if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
+                        pass
+                    if (terminal_text.get(1.0, END) == ''):
+                        lineindex = 1.8
+                        endlineindex = 1.0
+                        terminal_text.insert(END, f'{drivename+path}>') 
+                if PathVar == 0:
                     lineindex = 1.4
                     endlineindex = 1.0
-                    terminal_text.insert(END, f'{drivename+path}>') 
-            lineindex += 1
-            endlineindex += 1
+                    code = exec(terminal_text.get(lineindex, f'{str(endlineindex)} lineend'))
+                    if (terminal_text.get(lineindex, str(endlineindex) + " lineend") == ''):
+                        pass
+                    if (terminal_text.get(1.0, END) == ''):
+                        lineindex = 1.4
+                        endlineindex = 1.0
+                        terminal_text.insert(END, f'{drivename+path}>') 
+                lineindex += 1
+                endlineindex += 1
     except Exception as e:
         terminal_text.insert(END, f'{e}')
         lineindex += 1
         endlineindex += 1
 # tasks display
 def tasks_display(event=None):
-    global task_display, srcv, touched, dirs, opened, terminalVar, task_displayed
+    global task_display, srcv, touched, dirs, opened, terminalVar, task_displayed, painting
     task_displayed = True
     if task_displayed:
         task_display = Listbox(root, height=screen_height, width=100, fg='blue', bg='white', selectbackground='light blue', highlightbackground='red', highlightcolor='red', highlightthickness=3, cursor='top_left_arrow')
@@ -440,10 +510,11 @@ def tasks_display(event=None):
         task_display.insert(0, 'edit_src [not running]')
         task_display.insert(1, 'touch_file [not running]')
         task_display.insert(2, 'open_file [not running]')
-        task_display.insert(3, 'root [running]')
-        task_display.insert(4, 'home [running]')
-        task_display.insert(5, 'task_display [running]')
-        task_display.insert(6, 'skylog [running]')
+        task_display.insert(3, 'paint [not running]')
+        task_display.insert(4, 'root [running]')
+        task_display.insert(5, 'home [running]')
+        task_display.insert(6, 'task_display [running]')
+        task_display.insert(7, 'skylog [running]')
 
         # edit tasks
         if srcv:
@@ -464,12 +535,18 @@ def tasks_display(event=None):
         if opened == False:
             task_display.delete(2)
             task_display.insert(2, 'open_file [not running]')
+        if painting:
+            task_display.delete(3)
+            task_display.insert(3, 'canvas [running]')
+        if painting == False:
+            task_display.delete(3)
+            task_display.insert(3, 'canvas [not running]')
         root.update()
         root.update_idletasks()
 
 # update task display
 def task_update(event=None):
-    global task_display, srcv, touched, opened, terminalVar, task_displayed
+    global task_display, srcv, touched, opened, terminalVar, task_displayed, painting
     root.update()
     root.update_idletasks()
     if task_displayed:
@@ -491,6 +568,12 @@ def task_update(event=None):
         if opened == False:
             task_display.delete(2)
             task_display.insert(2, 'open_file [not running]')
+        if painting:
+            task_display.delete(3)
+            task_display.insert(3, 'canvas [running]')
+        if painting == False:
+            task_display.delete(3)
+            task_display.insert(3, 'canvas [not running]')
     root.after(500, task_update)
 
 # skylog
@@ -573,7 +656,8 @@ def show_skylog(event=None):
         root.unbind('<Control-r>')
 # Toggle display of terminal and task display
 def return_terminal(event=None):
-    global terminal_text, terminalVar, lineindex, endlineindex, PathVar
+    global terminal_text, terminalVar, lineindex, endlineindex, PathVar, view
+    view = False
     if PathVar == 2:
         lineindex = 1.13
         endlineindex = 1.0
@@ -622,7 +706,8 @@ def return_combination(event=None):
 
 # main terminal
 def terminal(event=None):
-    global terminal_text, shell, root, terminalVar, lineindex, endlineindex, PathVar
+    global terminal_text, shell, root, terminalVar, lineindex, endlineindex, PathVar, view
+    view = False
     if PathVar == 2:
         lineindex = 1.13
         endlineindex = 1.0
@@ -638,7 +723,8 @@ def terminal(event=None):
     terminal_text.pack(side=LEFT)
     shell = True
     if shell:
-        root.bind('<Return>', execute_command)
+        if view == False:
+            root.bind('<Return>', execute_command)
 
 # skyos loading progressbar
 def load_skyos():
@@ -680,6 +766,8 @@ def start_skyos():
     global skyos_label, label, root, progress_bar
     root.after(1, transition2)
     skyos_label = Label(root, bg='light blue', fg='white', text='SkyOS', width=20)
+    menulabel = Label(root, bg='blue', fg='white', font='Courier 10', text='MENU', width=14)
+    menulabel.place(x=0, y=0)
     label.destroy()
     progress_bar.destroy()
     root.config(bg='blue')
@@ -688,6 +776,7 @@ def start_skyos():
     root.after(600, skylog)
     root.after(600, return_combination)
     root.after(1, terminal)
+    root.after(2, menu)
     root.after(500, tasks_display)
     root.after(500, task_update)
 
@@ -722,7 +811,6 @@ def boot_skyos():
     root.after(100, load_skyos)
 
 progress_bar = ttk.Progressbar(root, orient="horizontal", length=200, mode="determinate")
-
 # start functions
 root.after(2000, load_boot)
 root.after(4000, display_cpu_info)
